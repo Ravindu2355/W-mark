@@ -37,8 +37,8 @@ def download_video(url):
 def add_logo_to_video(video_path, logo_path, output_path, progress_callback):
     video_clip = VideoFileClip(video_path)
     logo = ImageClip(logo_path)
-    #logo = logo.resize(height=50)
-    logo = logo.resize(height=50, resample=Image.Resampling.LANCZOS)
+    logo = logo.resize(height=50)
+    #logo = logo.resize(height=50, resample=Image.Resampling.LANCZOS) 
     logo = logo.set_position(("right", "top")).set_duration(video_clip.duration)
     
     # Simulating progress
