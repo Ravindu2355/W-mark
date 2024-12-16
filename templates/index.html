@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Logo Overlay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload a Video and Add a Logo</h1>
+        
+        <form id="video-form">
+            <input type="url" id="video-url" placeholder="Enter Video URL" required>
+            <button type="submit">Process Video</button>
+        </form>
+
+        <div id="progress-container" style="display: none;">
+            <p>Processing... <span id="progress-text">0%</span></p>
+            <div id="progress-bar"><div id="progress-fill"></div></div>
+        </div>
+
+        <div id="result" style="display: none;">
+            <h2>Video Processed Successfully!</h2>
+            <a id="download-link" href="#" target="_blank">Download Processed Video</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('video-form');
+        const videoUrlInput = document.getElementById('video-url');
+        const progressContainer = document.getElementById('progress-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const result = document.getElementById('result');
+        const downloadLink = document.getElementById('download-link');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const videoUrl = videoUrlInput.value;
+
+            progressContainer.style.display = 'block';
+            result.style.display = 'none';
+
+            fetch('/process-video', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ video_url: videoUrl })
+            })
+            .then(response => response.json())
+            .then(data => {
+                checkProgress();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function checkProgress() {
+            const interval = setInterval(() => {
+                fetch('/progress')
+                    .then(response => response.json())
+                    .then(data => {
+                        const progress = data.progress;
+                        progressText.textContent = `${Math.round(progress)}%`;
+                        progressFill.style.width = `${progress}%`;
+
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            result.style.display = 'block';
+                            downloadLink.href = '/processed/output_video.mp4';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching progress:', error);
+                    });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
