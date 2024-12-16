@@ -33,12 +33,21 @@ def download_video(url):
     else:
         raise Exception(f"Failed to download video: {response.status_code}")
 
-# Function to add a logo to the video
 def add_logo_to_video(video_path, logo_path, output_path, progress_callback):
     video_clip = VideoFileClip(video_path)
-    logo = ImageClip(logo_path)
-    logo = logo.resize(height=50)
-    #logo = logo.resize(height=50, resample=Image.Resampling.LANCZOS) 
+
+    # Open the logo with Pillow
+    logo_image = Image.open(logo_path)
+    
+    # Resize the logo with Pillow using the resample argument
+    logo_image = logo_image.resize((logo_image.width, 50), resample=Image.Resampling.LANCZOS)
+    
+    # Save the resized logo to a temporary file
+    resized_logo_path = 'resized_logo.png'
+    logo_image.save(resized_logo_path)
+
+    # Create an ImageClip from the resized logo
+    logo = ImageClip(resized_logo_path)
     logo = logo.set_position(("right", "top")).set_duration(video_clip.duration)
     
     # Simulating progress
@@ -57,6 +66,8 @@ def add_logo_to_video(video_path, logo_path, output_path, progress_callback):
     
     # Final progress update
     progress_callback(100)
+
+# Function to add a logo to the video
 
 # API route to process the video
 @app.route('/process-video', methods=['POST'])
